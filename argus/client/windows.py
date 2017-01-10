@@ -124,7 +124,9 @@ class WinRemoteClient(base.BaseClient):
     def _run_commands(self, commands, commands_type=util.POWERSHELL,
                       upper_timeout=CONFIG.argus.upper_timeout):
         protocol_client = self._get_protocol()
-        shell_id = protocol_client.open_shell(codepage=CODEPAGE_UTF8)
+        shell_id = util.exec_with_retry(lambda: (protocol_client.open_shell(
+            codepage=CODEPAGE_UTF8)))
+
         try:
             results = [self._run_command(protocol_client, shell_id, command,
                                          commands_type, upper_timeout)
