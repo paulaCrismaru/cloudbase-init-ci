@@ -185,14 +185,11 @@ class BaseHeatBackend(base.CloudBackend):
         stacks = self._get_stacks()
         retry_count = stacks * retry_count
         retry_delay = stacks * retry_delay
-        while retry_count > 0:
-            if not self._get_stacks():
-                return
-            else:
-                retry_count -= 1
-            time.sleep(retry_delay)
-        raise exceptions.ArgusHeatTeardown(
-            "All stacks failed to be deleted in time!")
+        try:
+            util.exec_with_retry(self._get_stacks, retry_count, retry_delay)
+        except exceptions.ArgusTimeoutError:
+            raise exceptions.ArgusHeatTeardown(
+                "All stacks failed to be deleted in time!")
 
     def _delete_floating_ip(self):
         # The floating IP in the new version is deleted when the

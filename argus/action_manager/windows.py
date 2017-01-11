@@ -219,7 +219,7 @@ class WindowsActionManager(base.BaseActionManager):
         LOG.info("Trying to install Cloudbase-Init.")
         installer = self._get_installer_name()
 
-        for _ in range(CONFIG.argus.retry_count):
+        def try_install_cbinit():
             for install_method in (self._run_installation_script,
                                    self._deploy_using_scheduled_task):
                 try:
@@ -230,8 +230,13 @@ class WindowsActionManager(base.BaseActionManager):
                     if self.check_cbinit_installation():
                         return True
                 self.cbinit_cleanup()
-
-        return False
+        try:
+            util.exec_with_retry(try_install_cbinit)
+        except exceptions.ArgusTimeoutError as exc:
+            LOG.debug("%s", exc)
+            return False
+        else:
+            return True
 
     def _run_installation_script(self, installer):
         """Run the installation script for Cloudbase-Init."""
@@ -289,7 +294,7 @@ class WindowsActionManager(base.BaseActionManager):
         cmd = "git clone '{repo}' '{location}'".format(repo=repo_url,
                                                        location=location)
 
-        while count > 0:
+        def clone():
             try:
                 self._client.run_command(cmd)
             except exceptions.ArgusError as exc:
@@ -297,15 +302,15 @@ class WindowsActionManager(base.BaseActionManager):
                 if self.exists(location):
                     rem = self.rmdir if self.is_dir(location) else self.remove
                     rem(location)
-                count -= 1
-                if count:
-                    LOG.debug('Retrying...')
-                    time.sleep(delay)
-            else:
-                return True
-
-        LOG.debug('Could not clone %s', repo_url)
-        return False
+                raise Exception()
+        try:
+            util.exec_with_retry(clone, count, delay)
+        except exceptions.ArgusTimeoutError as exc:
+            LOG.debug('Could not clone %s', repo_url)
+            LOG.debug("%r.", exc)
+            return False
+        else:
+            return True
 
     def wait_cbinit_service(self):
         """Wait if the Cloudbase-Init Service to stop."""

@@ -23,6 +23,7 @@ import unittest
 from six.moves import urllib
 
 from argus import config as argus_config
+from argus import exceptions
 from argus import log as argus_log
 from argus.tests import base
 from argus.tests.cloud import util as test_util
@@ -161,9 +162,8 @@ class TestCloudstackUpdatePasswordSmoke(base.BaseTestCase):
 
     def _wait_for_service_status(self, status, retry_count=3,
                                  retry_interval=1):
-        while retry_count:
+        def do_request():
             response_status = None
-            retry_count -= 1
             try:
                 response = urllib.request.urlopen(self.service_url)
                 response_status = response.getcode()
@@ -171,12 +171,16 @@ class TestCloudstackUpdatePasswordSmoke(base.BaseTestCase):
                 response_status = error.code
             except urllib.error.URLError:
                 pass
-
             if response_status == status:
                 return True
-            time.sleep(retry_interval)
+            raise Exception()
 
-        return False
+        try:
+            util.exec_with_retry(do_request, retry_count, retry_interval)
+        except exceptions.ArgusTimeoutError:
+            return False
+        else:
+            return True
 
     def _wait_for_completion(self, password):
         remote_client = self._backend.get_remote_client(

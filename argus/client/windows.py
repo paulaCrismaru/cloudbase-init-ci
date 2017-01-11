@@ -260,21 +260,11 @@ class WinRemoteClient(base.BaseClient):
         if not count or count < 0:
             count = 0
 
-        while True:
-            try:
-                return self.run_command(cmd, command_type=command_type,
-                                        upper_timeout=upper_timeout)
-            except Exception as exc:  # pylint: disable=broad-except
-                LOG.debug("Command failed with %r.", exc)
-                # A negative `count` means no count at all.
-                if count >= 0:
-                    count -= 1
-                if count == 0:
-                    raise exceptions.ArgusTimeoutError(
-                        "Command {!r} failed too many times."
-                        .format(cmd))
-                LOG.debug("Retrying '%s'", cmd)
-                time.sleep(delay)
+        def run_command():
+            return self.run_command(cmd, command_type=command_type,
+                                    upper_timeout=upper_timeout)
+
+        return util.exec_with_retry(run_command, count, delay)
 
     def run_command_until_condition(self, cmd, cond,
                                     retry_count=CONFIG.argus.retry_count,
@@ -298,7 +288,7 @@ class WinRemoteClient(base.BaseClient):
         if not retry_count or retry_count < 0:
             retry_count = 0
 
-        while True:
+        def aux():
             try:
                 stdout, stderr, exit_code = self.run_command(
                     cmd, command_type=command_type,
@@ -315,12 +305,4 @@ class WinRemoteClient(base.BaseClient):
                     return
                 else:
                     LOG.debug("Condition not met, retrying...")
-
-            if retry_count > 0:
-                retry_count -= 1
-                LOG.debug("Retrying '%s'", cmd)
-                time.sleep(delay)
-            else:
-                raise exceptions.ArgusTimeoutError(
-                    "Command {!r} failed too many times."
-                    .format(cmd))
+        return util.exec_with_retry(aux, retry_count, delay)
