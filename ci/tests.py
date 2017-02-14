@@ -84,9 +84,14 @@ class ScenarioLongHostname(BaseWindowsScenario):
     recipe_type = recipe.CloudbaseinitLongHostname
     userdata = util.get_resource('windows/netbios_hostname')
 
+
 class ScenarioIndependentPlugins(BaseWindowsScenario):
-    test_classes = (test_smoke.TestTrimPlugin, )
+    test_classes = (test_smoke.TestDisplayTimeoutPlugin,
+                    test_smoke.TestTrimPlugin,
+                    test_smoke.TestPageFilePlugin,
+                    test_smoke.TestNTPClientPlugin)
     recipe_type = recipe.CloudbaseinitIndependentPlugins
+
 
 class ScenarioUserAlreadyCreated(BaseWindowsScenario):
 

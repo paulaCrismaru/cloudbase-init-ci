@@ -572,7 +572,62 @@ class CloudbaseinitEnableTrim(CloudbaseinitRecipe):
                   ".TrimConfigPlugin")
 
 
-class CloudbaseinitIndependentPlugins(CloudbaseinitEnableTrim):
+class CloudbaseinitPageFilePlugin(CloudbaseinitEnableTrim):
+    """Recipe for testing the PageFile plugin"""
+
+    def prepare_cbinit_config(self, service_type):
+        super(CloudbaseinitPageFilePlugin, self).prepare_cbinit_config(
+            service_type)
+        LOG.info("Injecting page file options in the config file.")
+
+        self._cbinit_conf.append_conf_value(
+            name="page_file_volume_labels", value="Temporary Storage")
+        self._cbinit_conf.append_conf_value(
+            name="page_file_volume_mount_points", value="C:\\")
+        self._cbinit_conf.append_conf_value(
+            name="plugins",
+            value="cloudbaseinit.plugins.windows.pagefiles.PageFilesPlugin")
+
+
+class CloudbaseinitDisplayTimeoutPlugin(CloudbaseinitPageFilePlugin):
+    """Recipe for testing the DisplayIdleTimeout plugin"""
+
+    def prepare_cbinit_config(self, service_type):
+        super(CloudbaseinitDisplayTimeoutPlugin, self).prepare_cbinit_config(
+            service_type)
+        LOG.info("Injecting idle display options in the config file.")
+        self._cbinit_conf.append_conf_value(
+            name="display_idle_timeout", value="123")
+        self._cbinit_conf.append_conf_value(
+            name="plugins",
+            value="cloudbaseinit.plugins.windows.displayidletimeout."
+                  "DisplayIdleTimeoutConfigPlugin")
+
+
+class CloudbaseinitSetRealClock(CloudbaseinitDisplayTimeoutPlugin):
+
+    def pre_sysprep(self):
+        super(CloudbaseinitSetRealClock, self).pre_sysprep()
+        cmd = ("New-ItemProperty -Path '{}' -Name '{}' -Value '{}' "
+               "-PropertyType DWORD -Force".format(
+               r'HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation',
+               'RealTimeIsUniversal', 0))
+        self._backend.remote_client.run_command_verbose(cmd)
+
+    def prepare_cbinit_config(self, service_type):
+        super(CloudbaseinitSetRealClock, self).prepare_cbinit_config(
+            service_type)
+        LOG.info("Injecting real_time_clock_utc option in conf file.")
+        self._cbinit_conf.append_conf_value(
+            name="real_time_clock_utc",
+            value="true")
+        self._cbinit_conf.append_conf_value(
+            name="plugins",
+            value="cloudbaseinit.plugins.common.ntpclient."
+                  "NTPClientPlugin")
+
+
+class CloudbaseinitIndependentPlugins(CloudbaseinitSetRealClock):
     """Recipe for independent plugins."""
 
 
@@ -614,3 +669,5 @@ class CloudbaseinitImageRecipe(CloudbaseinitRecipe):
 
         self.wait_cbinit_finalization()
         LOG.info("Finished preparing instance.")
+
+
