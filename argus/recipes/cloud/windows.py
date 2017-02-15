@@ -604,7 +604,25 @@ class CloudbaseinitDisplayTimeoutPlugin(CloudbaseinitPageFilePlugin):
                   "DisplayIdleTimeoutConfigPlugin")
 
 
-class CloudbaseinitIndependentPlugins(CloudbaseinitDisplayTimeoutPlugin):
+class CloudbaseinitRenameAdminUserPlugin(CloudbaseinitDisplayTimeoutPlugin):
+
+    def prepare_cbinit_config(self, service_type):
+        super(CloudbaseinitRenameAdminUserPlugin, self).prepare_cbinit_config(
+            service_type)
+        LOG.info("Injecting guest rename_admin_user.")
+
+        self._cbinit_conf.append_conf_value(name='rename_admin_user',
+                                            value="True")
+        LOG.info("Injecting new username value.")
+        self._cbinit_conf.set_conf_value(name='username',
+                                         value="RenamedAdminUser")
+        self._cbinit_conf.append_conf_value(
+            name="plugins",
+            value="cloudbaseinit.plugins.windows.createuser."
+                  "CreateUserPlugin")
+
+
+class CloudbaseinitIndependentPlugins(CloudbaseinitRenameAdminUserPlugin):
     """Recipe for independent plugins."""
 
 

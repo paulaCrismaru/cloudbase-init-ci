@@ -240,3 +240,12 @@ class TestDisplayTimeoutPlugin(base.BaseTestCase):
             raise unittest.SkipTest('OS Version not supported')
         result = self._introspection.get_power_setting_value()
         self.assertTrue(result)
+
+
+class TestRenameUserAdminPlugin(base.BaseTestCase):
+
+    def test_check_renamed_user(self):
+        admin_exists = self._introspection.username_exists("Administrator")
+        renamed_user = self._introspection.username_exists("RenamedAdminUser")
+        self.assertFalse(admin_exists)
+        self.assertTrue(renamed_user)
