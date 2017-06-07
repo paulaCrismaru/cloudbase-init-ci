@@ -8,4 +8,4 @@ oslo.config
 python-keystoneclient
 python-heatclient
 cherrypy
-git+https://github.com/cloudbase/arestor.git@master#egg=arestor-0.1.0
+git+https://github.com/cloudbase/arestor.git@master#egg=arestor-0.1.1
