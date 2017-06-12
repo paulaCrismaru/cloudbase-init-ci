@@ -453,19 +453,19 @@ class skip_on_os(object):
 
 
 def userdata_base_64(content):
+    fd, path = tempfile.mkstemp()
     mimes = [_ for _ in email.message_from_string(content).walk()]
-    for mime in mimes:
-        if mimes.index(mime) == 0:
-            boundary = '--' + mime.get_boundary() + '\n'
-            continue
-        mime.__delitem__('Content-Transfer-Encoding')
-        mime.__setitem__('Content-Transfer-Encoding', 'base64')
-        if mimes.index(mime) < len(mimes) / 2:
-            mime.set_param("charset", "utf-8")
-        mime.set_payload(base64.b64encode(mime.get_payload()))
-    data = mimes[0].as_string().split(boundary)[0]
-    for index in xrange(1, len(mimes)):
-        data += boundary + '\n'
-        data += mime.as_string()
-        data += '\n'
-    return data
+    try:
+        os.write(fd, "Content-Type: multipart/mixed; "
+            "boundary=\"===============1598784645116016685==\"\n".decode())
+        os.write(fd, "MIME-Version: 1.0\n".decode())
+        for mime in mimes:
+            if mimes.index(mime) == 0:
+                boundary = mime.get_boundary()
+                continue
+            mime.replace_header('Content-Transfer-Encoding', 'base64')
+            os.write(fd, "--{}\n".format(boundary).decode())
+            os.write(fd, mime.as_string().decode())
+        os.close(fd)
+    finally:
+        os.remove(path)
