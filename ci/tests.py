@@ -261,3 +261,10 @@ class ScenarioPasswordLength(BaseWindowsScenario):
 
     test_classes = (test_smoke.TestPasswordLength,)
     recipe_type = recipe.CloudbaseinitPasswordRecipe
+
+
+class ScenarioMultipartSmokeBase64(ScenarioMultipartSmoke):
+    test_classes = (test_smoke.TestScriptsUserdataSmoke,
+                    smoke.TestSetTimezone)
+    recipe_type = recipe.CloudbaseinitBase64UserdataRecipe
+    userdata = util.get_resource('windows/multipart_userdata')
