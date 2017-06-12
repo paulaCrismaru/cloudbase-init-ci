@@ -16,6 +16,7 @@
 import base64
 import collections
 import contextlib
+import email
 import logging
 import pkgutil
 import random
@@ -449,3 +450,22 @@ class skip_on_os(object):
             else:
                 return function(*args, **kwargs)
         return wrapper
+
+
+def userdata_base_64(content):
+    mimes = [_ for _ in email.message_from_string(content).walk()]
+    for mime in mimes:
+        if mimes.index(mime) == 0:
+            boundary = '--' + mime.get_boundary() + '\n'
+            continue
+        mime.__delitem__('Content-Transfer-Encoding')
+        mime.__setitem__('Content-Transfer-Encoding', 'base64')
+        if mimes.index(mime) < len(mimes) / 2:
+            mime.set_param("charset", "utf-8")
+        mime.set_payload(base64.b64encode(mime.get_payload()))
+    data = mimes[0].as_string().split(boundary)[0]
+    for index in xrange(1, len(mimes)):
+        data += boundary + '\n'
+        data += mime.as_string()
+        data += '\n'
+    return data

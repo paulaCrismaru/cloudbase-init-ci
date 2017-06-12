@@ -267,4 +267,5 @@ class ScenarioMultipartSmokeBase64(ScenarioMultipartSmoke):
     test_classes = (test_smoke.TestScriptsUserdataSmoke,
                     smoke.TestSetTimezone)
     recipe_type = recipe.CloudbaseinitBase64UserdataRecipe
-    userdata = util.get_resource('windows/multipart_userdata')
+    userdata = util.userdata_base_64(
+                    util.get_resource('windows/multipart_userdata'))

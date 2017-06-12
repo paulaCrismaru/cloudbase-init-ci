@@ -832,35 +832,3 @@ class CloudbaseinitPasswordRecipe(CloudbaseinitWinrmRecipe):
         self._cbinit_conf.set_conf_value(
             name="user_password_length",
             value="3")
-
-
-class CloudbaseinitBase64UserdataRecipe(CloudbaseinitRecipe):
-
-    def pre_sysprep(self):
-        super(CloudbaseinitBase64UserdataRecipe, self).pre_sysprep()
-        LOG.debug("Preparing userdata file.")
-        resource_location = "windows\multipart_userdata"
-        self._backend.remote_client.manager.download_resource(
-            resource_location=resource_location,
-            location=r'C:\multipart_userdata.b64')
-        with open('C:\multipart_userdata.b64', 'rb') as f:
-            data = f.read()
-        LOG.info(data)
-        mimes = [_ for _ in email.message_from_string(data).walk()]
-        for mime in mimes:
-            if mimes.index(mime) == 0:
-                boundary = '--' + mime.get_boundary() + '\n'
-                continue
-            mime.__delitem__('Content-Transfer-Encoding')
-            mime.__setitem__('Content-Transfer-Encoding', 'base64')
-            if mimes.index(mime) < len(mimes) / 2:
-                mime.set_param("charset", "utf-8")
-            mime.set_payload(base64.b64encode(mime.get_payload()))
-        data = mimes[0].as_string().split(boundary)[0]
-        for index in xrange(1, len(mimes)):
-            data += boundary + '\n'
-            data += mime.as_string()
-            data += '\n'
-        LOG.info(data)
-        with open('C:\multipart_userdata.b64', 'wb') as file_result:
-            file_result.write(data)
