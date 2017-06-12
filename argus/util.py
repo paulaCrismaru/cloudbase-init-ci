@@ -467,5 +467,7 @@ def userdata_base_64(content):
             os.write(fd, "--{}\n".format(boundary).decode())
             os.write(fd, mime.as_string().decode())
         os.close(fd)
+        with open(path, 'r') as f:
+            return f.read()
     finally:
         os.remove(path)
