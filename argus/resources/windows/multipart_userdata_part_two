@@ -7,7 +7,8 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Content-Disposition: attachment; filename="cloud-config"
 
-set_hostname: newhostname
+set_hostname: newhostname.fake.fqdn
+preserve_hostname: true
 
 
 --===============1598784645116016685==
