@@ -239,8 +239,21 @@ def run_once(func, state={}, errors={}):
     return wrapper
 
 
-def get_resource(resource):
+def get_resource(resource, config=None):
     """Get the given resource from the list of known resources."""
+    if config is not None:
+        base_resources_url = config.argus.resources
+        if not base_resources_url.endswith('/'):
+            base_resources_url += '/'
+        url = six.moves.urllib.parse.urljoin(
+            base_resources_url, resource)
+        try:
+            return exec_with_retry(
+                lambda: (six.moves.urllib.request.urlopen(url).read()),
+                config.argus.retry_count,
+                config.argus.retry_delay)
+        except exceptions.ArgusTimeoutError:
+            pass
     return pkgutil.get_data('argus.resources', resource)
 
 
@@ -330,20 +343,20 @@ def get_namedtuple(name, members, values):
     return nt_class(*values)
 
 
-def get_public_keys():
+def get_public_keys(config=None):
     """Get the *public_keys* resource.
 
     Used by the Cloudbase-Init tests.
     """
-    return get_resource("public_keys").splitlines()
+    return get_resource("public_keys", config).splitlines()
 
 
-def get_certificate():
+def get_certificate(config=None):
     """Get the *certificate* resource.
 
     Used by the Cloudbase-Init tests.
     """
-    return get_resource("certificate")
+    return get_resource("certificate", config)
 
 
 def _get_command_powershell(command):

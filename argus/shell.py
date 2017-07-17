@@ -113,7 +113,7 @@ def _prepare_argument_parser():
                         help="The flavor id.")
     parser.add_argument("-t", "--tests", default="",
                         help="The tests you want to run.")
-    parser.add_argument("-r", "--resources", default=ci.RESOURCES_LINK,
+    parser.add_argument("-r", "--resources", default=CONFIG.argus.resources,
                         help="URL to Argus resources.")
     parser.add_argument("-p", "--parallel", type=int,
                         help="many processes to use in parallel.")

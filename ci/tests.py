@@ -47,7 +47,7 @@ class ScenarioHeatSmoke(BaseWindowsScenario):
 
     test_classes = (test_smoke.TestSmoke, test_smoke.TestHeatUserdata)
     backend_type = heat_backend.WindowsHeatBackend
-    userdata = util.get_resource('windows/test_heat.ps1')
+    userdata = util.get_resource('windows/test_heat.ps1', CONFIG)
 
 
 class ScenarioMultipartSmoke(BaseWindowsScenario):
@@ -55,7 +55,7 @@ class ScenarioMultipartSmoke(BaseWindowsScenario):
     test_classes = (test_smoke.TestScriptsUserdataSmoke,
                     smoke.TestSetTimezone)
     recipe_type = recipe.CloudbaseinitScriptRecipe
-    userdata = util.get_resource('windows/multipart_userdata')
+    userdata = util.get_resource('windows/multipart_userdata', CONFIG)
 
 
 class ScenarioMultipartAdvancedSmoke(BaseWindowsScenario):
@@ -66,29 +66,29 @@ class ScenarioMultipartAdvancedSmoke(BaseWindowsScenario):
                     smoke.TestPowershellMultipartX86TxtExists,
                     smoke.TestUserdataFileExists,
                     smoke.TestNoError)
-    userdata = util.get_resource('windows/multipart_userdata_part_two')
+    userdata = util.get_resource('windows/multipart_userdata_part_two', CONFIG)
 
 
 class ScenarioMultipartGzipAdvancedSmoke(ScenarioMultipartAdvancedSmoke):
     userdata = util.gzip_data(
-        util.get_resource('windows/multipart_userdata_part_two'))
+        util.get_resource('windows/multipart_userdata_part_two', CONFIG))
 
 
 class ScenarioMultipartB64Smoke(ScenarioMultipartSmoke):
 
-    userdata = util.get_resource('windows/multipart_userdata_b64')
+    userdata = util.get_resource('windows/multipart_userdata_b64', CONFIG)
 
 
 class ScenarioMultipartB64GzipSmoke(ScenarioMultipartSmoke):
     userdata = util.gzip_data(
-        util.get_resource('windows/multipart_userdata_b64'))
+        util.get_resource('windows/multipart_userdata_b64', CONFIG))
 
 
 class ScenarioLongHostnameSmoke(BaseWindowsScenario):
 
     test_classes = (smoke.TestLongHostname, )
     recipe_type = recipe.CloudbaseinitLongHostname
-    userdata = util.get_resource('windows/netbios_hostname')
+    userdata = util.get_resource('windows/netbios_hostname', CONFIG)
 
 
 class ScenarioIndependentPlugins(BaseWindowsScenario):
@@ -119,7 +119,7 @@ class ScenarioUserAlreadyCreated(BaseWindowsScenario):
 class ScenarioGenericSmoke(BaseWindowsScenario):
 
     test_classes = (test_smoke.TestEC2Userdata, test_smoke.TestSmoke)
-    userdata = util.get_resource('windows/ec2script')
+    userdata = util.get_resource('windows/ec2script', CONFIG)
     metadata = {"admin_pass": "PASsw0r4&!="}
 
 
@@ -175,7 +175,7 @@ class ScenarioWinRMPlugin(BaseWindowsScenario):
                     test_smoke.TestCertificateWinRM)
     recipe_type = recipe.CloudbaseinitWinrmRecipe
     metadata = {"admin_pass": "PASsw0r4&!="}
-    userdata = util.get_certificate()
+    userdata = util.get_certificate(CONFIG)
 
 
 class ScenarioX509PublicKeys(BaseWindowsScenario,
@@ -250,7 +250,7 @@ class ScenarioImageSmoke(ScenarioBaseSmoke):
 
     test_classes = (test_smoke.TestSmoke, smoke.TestSwapEnabled)
     recipe_type = recipe.CloudbaseinitImageRecipe
-    userdata = util.get_resource("windows/winrm.ps1")
+    userdata = util.get_resource("windows/winrm.ps1", CONFIG)
 
 
 class ScenarioPasswordLength(BaseWindowsScenario):

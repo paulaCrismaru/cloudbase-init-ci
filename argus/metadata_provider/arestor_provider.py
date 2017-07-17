@@ -110,7 +110,7 @@ class ArestorMetadataProvider(base.BaseMetadataProvider,
             {
                 "name": "argus_x509_cert",
                 "type": "x509",
-                "data": util.get_certificate()
+                "data": util.get_certificate(CONFIG)
             },
         ]
         argus_ssh_pubkeys = {
