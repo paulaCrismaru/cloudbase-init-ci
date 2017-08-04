@@ -96,6 +96,10 @@ class ArgusOptions(conf_base.Options):
             cfg.BoolOpt("delete_instance", default=True,
                         help="Delete the instance when the "
                              "scenario is over."),
+            cfg.StrOpt("service_type", default='http',
+                       choices=[
+                           'http', 'configdrive', 'ec2', 'opennebula',
+                           'cloudstack', 'maas', 'noservice'],),
         ]
 
     def register(self):

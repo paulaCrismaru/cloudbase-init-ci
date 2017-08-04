@@ -31,11 +31,13 @@ from argus import util
 
 CONFIG = argus_config.CONFIG
 
+
 class BaseWindowsScenario(scenarios.CloudScenario):
 
     backend_type = tempest_backend.BaseWindowsTempestBackend
     introspection_type = introspection.InstanceIntrospection
     recipe_type = recipe.CloudbaseinitRecipe
+    service_type = CONFIG.argus.service_type
 
 
 class ScenarioBaseSmoke(BaseWindowsScenario):
